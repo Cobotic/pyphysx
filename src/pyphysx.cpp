@@ -243,6 +243,14 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("global_pose") = physx::PxTransform(physx::PxIdentity),
                  arg("global_pose_other") = physx::PxTransform(physx::PxIdentity),
                  "Return true if two shapes overlaps."
+            )
+            .def("set_rest_offset",&Shape::set_rest_offset,
+                 arg("offset"),
+                 "Set rest offset"
+            )
+            .def("set_contact_offset",&Shape::set_contact_offset,
+                 arg("offset"),
+                 "Set contact offset"
             );
 
     py::class_<RigidActor>(m, "RigidActor")

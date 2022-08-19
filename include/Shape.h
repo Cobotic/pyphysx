@@ -105,6 +105,14 @@ public:
         );
     }
 
+    void set_rest_offset(const float offset) {
+        get_physx_ptr()->setRestOffset(offset);
+    }
+
+    void set_contact_offset(const float offset) {
+        get_physx_ptr()->setContactOffset(offset);
+    }
+
     static Shape create_box(const Eigen::Vector3f &sz, Material mat, bool is_exclusive) {
         return Shape::from_geometry(physx::PxBoxGeometry(0.5 * sz[0], 0.5 * sz[1], 0.5 * sz[2]), mat, is_exclusive);
     }
