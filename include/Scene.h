@@ -45,10 +45,12 @@ public:
     }
 
     /** @brief Simulate scene for given amount of time dt and fetch results with blocking. */
-    void simulate(float dt) {
-        get_physx_ptr()->simulate(dt);
-        get_physx_ptr()->fetchResults(true);
-        simulation_time += dt;
+    void simulate(float dt, int niters=1) {
+        for(int i=0; i<niters; i++) {            
+            get_physx_ptr()->simulate(dt);        
+            get_physx_ptr()->fetchResults(true);
+            simulation_time += dt;
+        }
     }
 
     void add_actor(RigidActor actor) {
