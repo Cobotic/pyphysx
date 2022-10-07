@@ -143,7 +143,8 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("gpu_dynamic_allocation_scale") = 1.
             )
             .def("simulate", &Scene::simulate,
-                 arg("dt") = 1. / 60.
+                 arg("dt") = 1. / 60.,
+                 arg("niters") = 1
             )
             .def("add_actor", &Scene::add_actor,
                  arg("actor")
