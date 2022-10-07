@@ -51,6 +51,7 @@ public:
             get_physx_ptr()->fetchResults(true);
             simulation_time += dt;
         }
+    }
 
     void add_actor(RigidActor actor) {
         get_physx_ptr()->addActor(*actor.get_physx_ptr());
