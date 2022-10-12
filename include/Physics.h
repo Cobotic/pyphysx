@@ -11,7 +11,7 @@
 #define SIM_PHYSX_PHYSICS_H
 
 #include <PxPhysicsAPI.h>
-
+#include <iostream>
 class Physics {
 
 public:
@@ -48,6 +48,7 @@ public:
     void operator=(Physics const &) = delete;
 
     virtual ~Physics() {
+        std::cout << "DELETING PHYSX" << std::endl;
 #define SAFE_RELEASE(x)    if(x)    { x->release(); x = nullptr;    }
         release_all_scenes();
         SAFE_RELEASE(dispatcher);
@@ -71,6 +72,7 @@ private:
     }
 
     void release_all_scenes() {
+        std::cout << "RELEASE ALL SCENES" << std::endl;
         std::vector<physx::PxScene *> scenes(physics->getNbScenes());
         physics->getScenes(&scenes[0], scenes.size());
         for (auto &scene : scenes) {

@@ -53,6 +53,9 @@ public:
         }
     }
 
+    void release() {
+        get_physx_ptr()->release();
+    }
     void add_actor(RigidActor actor) {
         get_physx_ptr()->addActor(*actor.get_physx_ptr());
     }

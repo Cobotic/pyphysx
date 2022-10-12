@@ -133,6 +133,7 @@ PYBIND11_MODULE(pyphysx, m) {
                         arg("num_cpu") = 0
             )
             .def_static("init_gpu", &Physics::init_gpu);
+            
 
     py::class_<Scene>(m, "Scene")
             .def(py::init<physx::PxFrictionType::Enum, physx::PxBroadPhaseType::Enum, std::vector<physx::PxSceneFlag::Enum>, size_t, float>(),
@@ -155,8 +156,8 @@ PYBIND11_MODULE(pyphysx, m) {
                  arg("agg")
             )
             .def("get_aggregates", &Scene::get_aggregates)
-            .def_readwrite("simulation_time", &Scene::simulation_time);
-
+            .def_readwrite("simulation_time", &Scene::simulation_time)
+            .def("release", &Scene::release);
     py::class_<Aggregate>(m, "Aggregate")
             .def(py::init<size_t, bool>(),
                  arg("max_size") = 256,
