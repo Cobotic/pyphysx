@@ -25,7 +25,7 @@ public:
     }
 
     static auto init_gpu() {
-#if !__APPLE__ and !defined(_WIN64) and !defined(_WIN32)
+#if !defined(__aarch64__) and !__APPLE__ and !defined(_WIN64) and !defined(_WIN32)
         physx::PxCudaContextManagerDesc desc;
         desc.interopMode = physx::PxCudaInteropMode::NO_INTEROP;
         Physics::get().cuda_context_manager = PxCreateCudaContextManager(*Physics::get().foundation, desc);
@@ -52,7 +52,7 @@ public:
 #define SAFE_RELEASE(x)    if(x)    { x->release(); x = nullptr;    }
         release_all_scenes();
         SAFE_RELEASE(dispatcher);
-#if !__APPLE__
+#if !defined(__aarch64__) and !__APPLE__
         SAFE_RELEASE(cuda_context_manager);
 #endif
         SAFE_RELEASE(cooking);
