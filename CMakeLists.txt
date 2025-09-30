@@ -19,7 +19,7 @@ add_compile_definitions(PX_PHYSX_STATIC_LIB)
 add_compile_definitions(HAS_CUDA=0) 
 conan_add_remote(NAME conan-center URL https://center.conan.io)
 conan_cmake_run(REQUIRES
-        tinyobjloader/1.0.6
+#        tinyobjloader/1.0.6
         eigen/3.3.7
         physx/4.1.1
         BASIC_SETUP BUILD missing)
