@@ -60,7 +60,7 @@ public:
     }
 
     void simbin(float dt, int niters=1) {
-        std::cout << "Simulating scene for " << dt*niters << " seconds." << std::endl;
+        // std::cout << "Simulating scene for " << dt*niters << " seconds." << std::endl;
         int i = 0;
         // for(int i=0; i<niters; i++) {            
         const auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
@@ -79,11 +79,12 @@ public:
             int zoutside = 0;
             for (const auto &actor : actors) {
                 physx::PxTransform pose = actor->getGlobalPose();
-                if (pose.p.x < -1 && pose.p.x > 1 || pose.p.y < -1 && pose.p.y > 1) {
+                if (pose.p.x < -.3 && pose.p.x > .3 || pose.p.y < -.3 && pose.p.y > .3) {
                     xyoutside++;
                 }
                 if (pose.p.z < 0 || pose.p.z > 1) {
                     zoutside++;
+                    actor->setLinearVelocity(physx::PxVec3(0, 0, 0));
                 }
                 if (pose.p.x > -1 && pose.p.x < 1 &&
                     pose.p.y > -1 && pose.p.y < 1 &&
@@ -102,18 +103,18 @@ public:
                
             }
             if (xyoutside > 0) {
-                std::cout << "Warning: " << xyoutside << " actors are outside the XY bounds." << std::endl;
+                // std::cout << "Warning: " << xyoutside << " actors are outside the XY bounds." << std::endl;
             }
             if (zoutside > 0) {
-                std::cout << "Warning: " << zoutside << " actors are outside the Z bounds." << std::endl;
+                // std::cout << "Warning: " << zoutside << " actors are outside the Z bounds." << std::endl;
             }
             // std::cout << "Number of moving actors: " << nMoving << std::endl;
             if (nMoving == 0) {
                 break;
             }
         }
-        std::cout << "Simulation finished after " << i << " iterations." << std::endl;
-        std::cout << "Simulation time: " << dt*i << " seconds." << std::endl;
+        // std::cout << "Simulation finished after " << i << " iterations." << std::endl;
+        // std::cout << "Simulation time: " << dt*i << " seconds." << std::endl;
         simulation_time += dt*niters;
     }
 
