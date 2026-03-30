@@ -16,7 +16,7 @@
 #include <RigidStatic.h>
 #include <D6Joint.h>
 #include <Aggregate.h>
-
+#include <Geometry.h>
 namespace py = pybind11;
 using py::arg;
 
@@ -147,6 +147,13 @@ PYBIND11_MODULE(_pyphysx, m) {
                  arg("dt") = 1. / 60.,
                  arg("niters") = 1
             )
+            .def("simbin", &Scene::simbin,
+               arg("dt") = 1. / 60.,
+               arg("niters") = 1
+            )
+            .def("all_collisions", &Scene::all_collisions //, py::overload_cast<std::vector<BoxGeometry>>(&Scene::all_collisions)
+                    // arg("scene_flags") = std::vector<physx::PxSceneFlag::Enum>()
+               )
             .def("add_actor", &Scene::add_actor,
                  arg("actor")
             )
@@ -434,4 +441,40 @@ PYBIND11_MODULE(_pyphysx, m) {
           arg("pose") = physx::PxTransform(physx::PxIdentity),
           "A function that takes all allowed pose representation and returns tuple pose representation.");
 
+    
+     py::class_<BoxGeometry>(m, "BoxGeometry")
+          .def(py::init<float, float, float>(),
+               arg("hx") = 0.5,
+               arg("hy") = 0.5,
+               arg("hz") = 0.5
+          );
+
+     py::class_<Gripper>(m, "Gripper")
+          .def(py::init<const std::vector<std::tuple<float, float, float>>&>(),
+               arg("extents"),
+               "Initialize the Gripper with a list of extents. Each extent is a tuple of (float, float, float).")
+          .def("compute_collisions", &Gripper::compute_collisions
+               // arg("world2bboxes"),
+               // "Compute collisions between the gripper and the given world2bboxes."
+          );
+               // py::class_<Gripper>(m, "Gripper")
+     //      .def(py::init<std::vector<std::tuple<float, float, float>>>);
+          // .def("get_gripper_pose", &Gripper::get_gripper_pose)
+          // .def("set_gripper_pose", &Gripper::set_gripper_pose,
+          //      arg("pose") = physx::PxTransform(physx::PxIdentity)
+          // )
+          // .def("get_gripper_size", &Gripper::get_gripper_size)
+          // .def("set_gripper_size", &Gripper::set_gripper_size,
+          //      arg("size") = 0.5
+          // )
+          // .def("get_grip_force", &Gripper::get_grip_force)
+          // .def("set_grip_force", &Gripper::set_grip_force,
+          //      arg("force") = 1.
+          // )
+          // .def("grip", &Gripper::grip,
+          //      arg("actor")
+          // )
+          // .def("release", &Gripper::release,
+          //      arg("actor")
+          // );
 }

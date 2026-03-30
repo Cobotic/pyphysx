@@ -6,3 +6,4 @@ pyphysx.egg-info
 .pytest_cache
 .idea
 .eggs
+.venv/

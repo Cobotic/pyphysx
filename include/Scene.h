@@ -13,6 +13,10 @@
 #include "RigidStatic.h"
 #include "Aggregate.h"
 
+#include "Gripper.h"
+#include "Geometry.h"
+#include <iostream>
+
 class Scene : public BasePhysxPointer<physx::PxScene> {
 public:
     Scene(const physx::PxFrictionType::Enum &friction_type,
@@ -49,10 +53,126 @@ public:
         for(int i=0; i<niters; i++) {            
             get_physx_ptr()->simulate(dt);        
             get_physx_ptr()->fetchResults(true);
-            simulation_time += dt;
         }
+        
+        simulation_time += dt*niters;
+        
     }
 
+    void simbin(float dt, int niters=1) {
+        std::cout << "Simulating scene for " << dt*niters << " seconds." << std::endl;
+        int i = 0;
+        // for(int i=0; i<niters; i++) {            
+        const auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
+        std::vector<physx::PxRigidDynamic *> actors(n);
+        get_physx_ptr()->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC,
+            reinterpret_cast<physx::PxActor **>(&actors[0]), n);
+        while (true) {
+            i++;
+            get_physx_ptr()->simulate(dt);        
+            get_physx_ptr()->fetchResults(true);
+            // auto dynamic_actors = get_dynamic_rigid_actors();
+            // std::cout << i <<": " << "Number of dynamic actors: " << n << std::endl;
+                
+            int nMoving = 0;
+            for (const auto &actor : actors) {
+                physx::PxTransform pose = actor->getGlobalPose();
+                if (pose.p.x > -1 && pose.p.x < 1 &&
+                    pose.p.y > -1 && pose.p.y < 1 &&
+                    pose.p.z > 0 && pose.p.z < 1) {
+                    // std::cout << "Actor is within the specified bounds." << std::endl;
+                    physx::PxVec3 velocity = actor->getLinearVelocity();
+                    float speed = velocity.magnitude();
+                    if (speed > 0.1) {
+                        // std::cout << "Actor is moving." << std::endl;
+                        nMoving++;
+                    } else {
+                        // std::cout << "Actor is not moving." << std::endl;
+                    }
+                    
+                }
+               
+            }
+            // std::cout << "Number of moving actors: " << nMoving << std::endl;
+            if (nMoving == 0) {
+                break;
+            }
+        }
+        std::cout << "Simulation finished after " << i << " iterations." << std::endl;
+        std::cout << "Simulation time: " << dt*i << " seconds." << std::endl;
+        simulation_time += dt*niters;
+    }
+
+    
+    
+    // std::vector<std::vector<bool>>  all_collisions(std::vector<BoxGeometry> bboxes) {
+    //     std::vector<physx::PxBoxGeometry *> bboxes_physx;
+    //     for (const auto &bbox : bboxes) {
+    //         bboxes_physx.emplace_back(bbox.get_physx_ptr());
+    //     }
+    //     return all_collisions(bboxes_physx);
+    // }
+    std::vector<std::vector<float>>  all_collisions() {
+        const auto n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC);
+        std::vector<physx::PxRigidActor *> pieces(n);
+        get_physx_ptr()->getActors(physx::PxActorTypeFlag::eRIGID_DYNAMIC,
+            reinterpret_cast<physx::PxActor **>(&pieces[0]), n);
+        // std::vector<physx::PxRigidActor*> test_pieces; // Test pieces
+        std::vector<physx::PxBoxGeometry *> bboxes; // Test bounding boxes
+        std::vector<std::vector<std::vector<physx::PxTransform>>> test_world2bboxes; // Test transforms
+        std::vector<physx::PxRigidActor*> extras; // Test other actors
+
+        // Initialize test arguments
+        // test_pieces = actors; // Use all dynamic actors as test pieces
+
+        // Create test bounding boxes
+        int ngrips = 14;
+        int nparts = 1;
+        for (int i = 0; i < nparts; ++i) {
+            // Create a box geometry for each part
+            // bboxes.push_back(new physx::PxBoxGeometry(0.1f, 0.1f, 0.1f)); // Example bounding box size
+            bboxes.push_back(new physx::PxBoxGeometry(0.1f, 0.1f, 0.1f)); // Example bounding box size
+        }
+        // bboxes.push_back(new physx::PxBoxGeometry(0.1f, 0.1f, 0.1f)); // Example bounding box size
+        // bboxes.push_back(new physx::PxBoxGeometry(0.1f, 0.1f, 0.1f)); // Example bounding box size
+        // bboxes.push_back(new physx::PxBoxGeometry(0.1f, 0.1f, 0.1f)); // Example bounding box size
+        
+        // Create test transforms
+        for (size_t i = 0; i < pieces.size(); ++i) {
+            std::vector<std::vector<physx::PxTransform>> transforms;
+            for (size_t j = 0; j < ngrips; ++j) { // Example: one transform per piece
+                std::vector<physx::PxTransform> sub;
+                for (size_t k = 0; k < bboxes.size(); ++k) {
+                    // Create a transform for each bounding box
+                    sub.emplace_back(pieces[i]->getGlobalPose()); // * physx::PxTransform(physx::PxVec3(0.1f * j, 0.0f, 0.0f)));
+                }
+                transforms.push_back(sub);
+            }
+            test_world2bboxes.push_back(transforms);
+        }
+
+        // Add other actors (e.g., static actors) to test_others
+        const auto static_n = get_physx_ptr()->getNbActors(physx::PxActorTypeFlag::eRIGID_STATIC);
+        std::vector<physx::PxRigidStatic *> static_actors(static_n);
+        get_physx_ptr()->getActors(physx::PxActorTypeFlag::eRIGID_STATIC,
+            reinterpret_cast<physx::PxActor **>(&static_actors[0]), static_n);
+        // extras.insert(extras.end(), static_actors.begin(), static_actors.end());
+        // Call compute_collisions with test arguments
+        std::cout << "Calling compute_collisions..." << std::endl;
+        auto start_time = std::chrono::high_resolution_clock::now();
+        std::vector<std::vector<float>> test_collisions = compute_gripper_collisions(pieces, bboxes, test_world2bboxes, extras);
+        auto end_time = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> delta_time = end_time - start_time;
+        std::cout << "Delta time: " << delta_time.count() << " seconds." << std::endl;
+        std::cout << "Collisions computed." << std::endl;
+        for (size_t i = 0; i < test_collisions.size(); ++i) {
+            for (size_t j = 0; j < test_collisions[i].size(); ++j) {
+                // std::cout << "Collision[" << i << "][" << j << "] = " << (test_collisions[i][j] ? "true" : "false") << std::endl;
+            }
+        }
+        // Return the test collisions
+        return test_collisions;
+    }
     void release() {
         get_physx_ptr()->release();
     }
@@ -87,6 +207,8 @@ public:
         return from_vector_of_physx_ptr<Aggregate>(aggs);
     }
 
+
+    
 public:
     double simulation_time = 0.;
 };
