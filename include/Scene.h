@@ -79,7 +79,7 @@ public:
             int zoutside = 0;
             for (const auto &actor : actors) {
                 physx::PxTransform pose = actor->getGlobalPose();
-                if (pose.p.x > -1 && pose.p.x < 1 || pose.p.y > -1 && pose.p.y < 1) {
+                if (pose.p.x < -1 && pose.p.x > 1 || pose.p.y < -1 && pose.p.y > 1) {
                     xyoutside++;
                 }
                 if (pose.p.z < 0 || pose.p.z > 1) {
