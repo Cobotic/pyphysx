@@ -75,8 +75,16 @@ public:
             // std::cout << i <<": " << "Number of dynamic actors: " << n << std::endl;
                 
             int nMoving = 0;
+            int xyoutside = 0;
+            int zoutside = 0;
             for (const auto &actor : actors) {
                 physx::PxTransform pose = actor->getGlobalPose();
+                if (pose.p.x > -1 && pose.p.x < 1 || pose.p.y > -1 && pose.p.y < 1) {
+                    xyoutside++;
+                }
+                if (pose.p.z < 0 || pose.p.z > 1) {
+                    zoutside++;
+                }
                 if (pose.p.x > -1 && pose.p.x < 1 &&
                     pose.p.y > -1 && pose.p.y < 1 &&
                     pose.p.z > 0 && pose.p.z < 1) {
@@ -92,6 +100,12 @@ public:
                     
                 }
                
+            }
+            if (xyoutside > 0) {
+                std::cout << "Warning: " << xyoutside << " actors are outside the XY bounds." << std::endl;
+            }
+            if (zoutside > 0) {
+                std::cout << "Warning: " << zoutside << " actors are outside the Z bounds." << std::endl;
             }
             // std::cout << "Number of moving actors: " << nMoving << std::endl;
             if (nMoving == 0) {
