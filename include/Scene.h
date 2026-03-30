@@ -89,10 +89,11 @@ public:
                     actor->setLinearVelocity(physx::PxVec3(0, 0, 0));
                     actor->setGlobalPose(physx::PxTransform(physx::PxVec3(pose.p.x, pose.p.y, 0.1f)));
                 }
-                if (pose.p.x > -1 && pose.p.x < 1 &&
-                    pose.p.y > -1 && pose.p.y < 1 &&
-                    pose.p.z > 0 && pose.p.z < 1) {
+                // if (pose.p.x > -1 && pose.p.x < 1 &&
+                //     pose.p.y > -1 && pose.p.y < 1 &&
+                //     pose.p.z > 0 && pose.p.z < 1) {
                     // std::cout << "Actor is within the specified bounds." << std::endl;
+                {
                     physx::PxVec3 velocity = actor->getLinearVelocity();
                     float speed = velocity.magnitude();
                     if (speed > 0.1) {
