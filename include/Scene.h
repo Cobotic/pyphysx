@@ -81,10 +81,13 @@ public:
                 physx::PxTransform pose = actor->getGlobalPose();
                 if (pose.p.x < -.3 && pose.p.x > .3 || pose.p.y < -.3 && pose.p.y > .3) {
                     xyoutside++;
+                    actor->setLinearVelocity(physx::PxVec3(0, 0, 0));
+                    actor->setGlobalPose(physx::PxTransform(physx::PxVec3(pose.p.x, pose.p.y, 0.1f)));
                 }
                 if (pose.p.z < 0 || pose.p.z > 1) {
                     zoutside++;
                     actor->setLinearVelocity(physx::PxVec3(0, 0, 0));
+                    actor->setGlobalPose(physx::PxTransform(physx::PxVec3(pose.p.x, pose.p.y, 0.1f)));
                 }
                 if (pose.p.x > -1 && pose.p.x < 1 &&
                     pose.p.y > -1 && pose.p.y < 1 &&
