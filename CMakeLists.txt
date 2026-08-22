@@ -10,8 +10,10 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+set(CONAN_CMAKE_URL "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake")
 if (NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
-    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/master/conan.cmake" "${CMAKE_BINARY_DIR}/conan.cmake")
+    file(DOWNLOAD "${CONAN_CMAKE_URL}" "${CMAKE_BINARY_DIR}/conan.cmake"
+         EXPECTED_HASH "SHA256=5cdb3042632da3efff558924eecefd580a0e786863a857ca097c3d1d43df5dcd")
 endif ()
 include(${CMAKE_BINARY_DIR}/conan.cmake)
 

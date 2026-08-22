@@ -28,16 +28,48 @@ For windows users, install these system dependencies:
 - CMake for Windows, with _Add to path_ option selected during installation
 - Visual studio build tools from this [link](https://visualstudio.microsoft.com/cs/visual-cpp-build-tools/)
 
+For Python 3.12 on Debian or Ubuntu, install the matching Python development headers:
+```
+sudo apt-get install build-essential cmake python3.12-dev
+```
+
+### Python 3.12 on render/train hosts
+
+For a fresh GPUHub or `render-train-dev` instance, build a wheel in the target
+Python 3.12 environment and install that exact wheel. This keeps the C++ extension
+ABI tied to the interpreter used by render and training jobs:
+
+```
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:deadsnakes/ppa -y
+sudo apt-get update
+sudo apt-get install build-essential cmake python3.12 python3.12-dev python3.12-venv
+
+python3.12 -m venv /opt/posestream-venvs/.venv-render-train
+source /opt/posestream-venvs/.venv-render-train/bin/activate
+python -m pip install --upgrade pip
+
+git clone git@github.com:Cobotic/pyphysx.git
+cd pyphysx
+python -m pip wheel --wheel-dir dist .
+python -m pip install --force-reinstall dist/pyphysx-*-cp312-*.whl
+python -c "import pyphysx; print(pyphysx.__file__)"
+```
+
+The Posestream bootstrap installs this fork automatically. For a reproducible
+deployment, pin the Posestream `PYPHYSX_REF` environment variable to the pushed
+commit SHA instead of relying on the moving `master` branch.
+
 ```
 # Install dependencies:
-pip install -U pip
-pip install -U conan --upgrade
-pip install --upgrade numpy
-pip install codecov pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat pytest-cov
+python -m pip install --upgrade pip
+python -m pip install --upgrade numpy
+python -m pip install codecov pyrender imageio imageio_ffmpeg trimesh networkx numba numpy_quaternion matplotlib scipy anytree meshcat pytest-cov
 
 # Clone and build from source:
 git clone https://github.com/petrikvladimir/pyphysx.git
-python setup.py install --user
+cd pyphysx
+python -m pip install .
 ```
 
 ## Trivial example
