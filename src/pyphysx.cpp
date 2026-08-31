@@ -76,6 +76,11 @@ PYBIND11_MODULE(_pyphysx, m) {
             .value("TWO_DIRECTIONAL", physx::PxFrictionType::eTWO_DIRECTIONAL)
             .export_values();
 
+    py::enum_<physx::PxSolverType::Enum>(m, "SolverType")
+            .value("PGS", physx::PxSolverType::ePGS)
+            .value("TGS", physx::PxSolverType::eTGS)
+            .export_values();
+
     py::enum_<physx::PxShapeFlag::Enum>(m, "ShapeFlag")
             .value("SIMULATION_SHAPE", physx::PxShapeFlag::eSIMULATION_SHAPE)
             .value("SCENE_QUERY_SHAPE", physx::PxShapeFlag::eSCENE_QUERY_SHAPE)
@@ -136,10 +141,11 @@ PYBIND11_MODULE(_pyphysx, m) {
             
 
     py::class_<Scene>(m, "Scene")
-            .def(py::init<physx::PxFrictionType::Enum, physx::PxBroadPhaseType::Enum, std::vector<physx::PxSceneFlag::Enum>, size_t, float>(),
+            .def(py::init<physx::PxFrictionType::Enum, physx::PxBroadPhaseType::Enum, std::vector<physx::PxSceneFlag::Enum>, physx::PxSolverType::Enum, size_t, float>(),
                  arg("friction_type") = physx::PxFrictionType::ePATCH,
                  arg("broad_phase_type") = physx::PxBroadPhaseType::eABP,
                  arg("scene_flags") = std::vector<physx::PxSceneFlag::Enum>(),
+                 arg("solver_type") = physx::PxSolverType::ePGS,
                  arg("gpu_max_num_partitions") = 8,
                  arg("gpu_dynamic_allocation_scale") = 1.
             )
@@ -147,11 +153,17 @@ PYBIND11_MODULE(_pyphysx, m) {
                  arg("dt") = 1. / 60.,
                  arg("niters") = 1
             )
+            .def("set_gravity", &Scene::set_gravity, arg("gravity"))
+            .def("get_gravity", &Scene::get_gravity)
+            .def("set_bounce_threshold_velocity", &Scene::set_bounce_threshold_velocity,
+                 arg("velocity"))
+            .def("get_bounce_threshold_velocity", &Scene::get_bounce_threshold_velocity)
             .def("add_actor", &Scene::add_actor,
                  arg("actor")
             )
             .def("get_static_rigid_actors", &Scene::get_static_rigid_actors)
             .def("get_dynamic_rigid_actors", &Scene::get_dynamic_rigid_actors)
+            .def("get_nb_sleeping_dynamic_actors", &Scene::get_nb_sleeping_dynamic_actors)
             .def("add_aggregate", &Scene::add_aggregate,
                  arg("agg")
             )
@@ -293,6 +305,20 @@ PYBIND11_MODULE(_pyphysx, m) {
             .def("set_linear_damping", &RigidDynamic::set_linear_damping,
                  arg("damping") = 0.
             )
+            .def("get_sleep_threshold", &RigidDynamic::get_sleep_threshold)
+            .def("set_sleep_threshold", &RigidDynamic::set_sleep_threshold,
+                 arg("threshold")
+            )
+            .def("get_stabilization_threshold", &RigidDynamic::get_stabilization_threshold)
+            .def("set_stabilization_threshold", &RigidDynamic::set_stabilization_threshold,
+                 arg("threshold")
+            )
+            .def("is_sleeping", &RigidDynamic::is_sleeping)
+            .def("get_wake_counter", &RigidDynamic::get_wake_counter)
+            .def("set_solver_iteration_counts", &RigidDynamic::set_solver_iteration_counts,
+                 arg("position_iters"),
+                 arg("velocity_iters") = 1
+            )
             .def("get_angular_velocity", &RigidDynamic::get_angular_velocity)
             .def("set_angular_velocity", &RigidDynamic::set_angular_velocity,
                  arg("vel")
@@ -305,6 +331,9 @@ PYBIND11_MODULE(_pyphysx, m) {
                  arg("max_vel")
             )
             .def("set_max_angular_velocity", &RigidDynamic::set_max_angular_velocity,
+                 arg("max_vel")
+            )
+            .def("set_max_depenetration_velocity", &RigidDynamic::set_max_depenetration_velocity,
                  arg("max_vel")
             )
             .def("add_force", &RigidDynamic::add_force,

@@ -59,6 +59,34 @@ public:
         return get_dyn_ptr()->getLinearDamping();
     }
 
+    void set_sleep_threshold(float threshold) {
+        get_dyn_ptr()->setSleepThreshold(threshold);
+    }
+
+    auto get_sleep_threshold() {
+        return get_dyn_ptr()->getSleepThreshold();
+    }
+
+    void set_stabilization_threshold(float threshold) {
+        get_dyn_ptr()->setStabilizationThreshold(threshold);
+    }
+
+    auto get_stabilization_threshold() {
+        return get_dyn_ptr()->getStabilizationThreshold();
+    }
+
+    auto is_sleeping() {
+        return get_dyn_ptr()->isSleeping();
+    }
+
+    auto get_wake_counter() {
+        return get_dyn_ptr()->getWakeCounter();
+    }
+
+    void set_solver_iteration_counts(unsigned int position_iters, unsigned int velocity_iters) {
+        get_dyn_ptr()->setSolverIterationCounts(position_iters, velocity_iters);
+    }
+
     auto get_linear_velocity() {
         return get_dyn_ptr()->getLinearVelocity();
     }
@@ -73,6 +101,10 @@ public:
 
     void set_max_angular_velocity(float max_vel) {
         get_dyn_ptr()->setMaxAngularVelocity(max_vel);
+    }
+
+    void set_max_depenetration_velocity(float max_vel) {
+        get_dyn_ptr()->setMaxDepenetrationVelocity(max_vel);
     }
 
     void add_force(const physx::PxVec3 &force, physx::PxForceMode::Enum &force_mode) {

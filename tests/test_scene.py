@@ -56,6 +56,53 @@ class SceneTestCase(unittest.TestCase):
 
         self.assertEqual(2, len(scene.get_aggregates()))
 
+    def test_swept_ccd_filter_stops_fast_actor_at_thin_floor(self):
+        material = Material(restitution=0)
+        floor = RigidStatic()
+        floor.attach_shape(Shape.create_box([1, 1, 0.01], material))
+        floor.set_global_pose([0, 0, -0.005])
+
+        actor = RigidDynamic()
+        actor.attach_shape(Shape.create_box([0.01] * 3, material))
+        actor.set_mass(0.01)
+        actor.set_global_pose([0, 0, 0.1])
+        actor.set_linear_velocity([0, 0, -10])
+        actor.set_rigid_body_flag(RigidBodyFlag.ENABLE_CCD, True)
+
+        scene = Scene(scene_flags=[SceneFlag.ENABLE_CCD])
+        scene.add_actor(floor)
+        scene.add_actor(actor)
+        scene.simulate(0.02)
+
+        self.assertGreater(actor.get_global_pose()[0][2], 0)
+
+    def test_sleeping_dynamic_actor_count(self):
+        scene = Scene()
+        material = Material(restitution=0)
+        floor = RigidStatic()
+        floor.attach_shape(Shape.create_box([1, 1, 0.1], material))
+        floor.set_global_pose([0, 0, -0.05])
+        actor = RigidDynamic()
+        actor.attach_shape(Shape.create_box([0.01] * 3, material))
+        actor.set_mass(0.01)
+        actor.set_global_pose([0, 0, 0.1])
+        scene.add_actor(floor)
+        scene.add_actor(actor)
+        scene.simulate(dt=1 / 80, niters=80)
+
+        self.assertEqual(scene.get_nb_sleeping_dynamic_actors(), 1)
+
+    def test_tgs_solver_and_configurable_gravity(self):
+        scene = Scene(solver_type=SolverType.TGS)
+        scene.set_gravity([0, 0, -1.5])
+
+        np.testing.assert_allclose(scene.get_gravity(), [0, 0, -1.5])
+
+    def test_configurable_bounce_threshold_velocity(self):
+        scene = Scene()
+        scene.set_bounce_threshold_velocity(0.5)
+        self.assertAlmostEqual(scene.get_bounce_threshold_velocity(), 0.5)
+
 
 if __name__ == '__main__':
     unittest.main()

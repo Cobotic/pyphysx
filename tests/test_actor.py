@@ -50,6 +50,17 @@ class ActorTest(unittest.TestCase):
         self.assertAlmostEqual(0.1, actor.get_linear_damping())
         self.assertAlmostEqual(0.2, actor.get_angular_damping())
 
+    def test_sleep_and_stabilization_controls(self):
+        actor = RigidDynamic()
+        actor.set_sleep_threshold(5e-4)
+        actor.set_stabilization_threshold(2e-4)
+        actor.set_solver_iteration_counts(8, 2)
+        actor.set_max_depenetration_velocity(1.5)
+        self.assertAlmostEqual(5e-4, actor.get_sleep_threshold())
+        self.assertAlmostEqual(2e-4, actor.get_stabilization_threshold())
+        self.assertIsInstance(actor.is_sleeping(), bool)
+        self.assertGreaterEqual(actor.get_wake_counter(), 0)
+
     def test_userdata(self):
         name1 = "asdf"
         actor = RigidDynamic()

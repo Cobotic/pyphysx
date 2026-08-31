@@ -11,6 +11,8 @@
 #define SIM_PHYSX_PHYSICS_H
 
 #include <PxPhysicsAPI.h>
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 class Physics {
 
@@ -61,11 +63,29 @@ public:
     }
 
 private:
+    static float scale_from_environment(const char *name, float fallback) {
+        const char *value = std::getenv(name);
+        if (value == nullptr || value[0] == '\0') {
+            return fallback;
+        }
+        char *end = nullptr;
+        const float parsed = std::strtof(value, &end);
+        if (end == value || *end != '\0' || !std::isfinite(parsed) || parsed <= 0.0f) {
+            std::cerr << "Ignoring invalid positive PhysX scale " << name
+                      << "=" << value << std::endl;
+            return fallback;
+        }
+        return parsed;
+    }
+
     Physics() {
         using namespace physx;
+        PxTolerancesScale scale;
+        scale.length = scale_from_environment("DEEPOSE_PHYSX_TOLERANCE_LENGTH", scale.length);
+        scale.speed = scale_from_environment("DEEPOSE_PHYSX_TOLERANCE_SPEED", scale.speed);
         foundation = PxCreateFoundation(PX_PHYSICS_VERSION, allocator, error_callback);
-        physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale());
-        auto params = PxCookingParams(PxTolerancesScale());
+        physics = PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, scale);
+        auto params = PxCookingParams(scale);
         params.buildGPUData = true;
         cooking = PxCreateCooking(PX_PHYSICS_VERSION, *foundation, params);
         dispatcher = physx::PxDefaultCpuDispatcherCreate(0);
