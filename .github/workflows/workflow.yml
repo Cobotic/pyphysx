@@ -38,13 +38,26 @@ jobs:
 
       - name: Select macOS compiler
         if: runner.os == 'macOS'
-        run: sudo xcode-select --switch /Applications/Xcode_16.4.app/Contents/Developer
+        run: |
+          echo "DEVELOPER_DIR=/Applications/Xcode_16.2.app/Contents/Developer" >> "$GITHUB_ENV"
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+
+      - name: Install supported Windows compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+          $vs = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+          $process = Start-Process $installer -Wait -PassThru -ArgumentList @('modify', '--installPath', "`"$vs`"", '--add', 'Microsoft.VisualStudio.Component.VC.14.39.17.9.x86.x64', '--quiet', '--norestart', '--nocache')
+          if ($process.ExitCode -notin @(0, 3010)) { throw "VS installer failed: $($process.ExitCode)" }
+          "CMAKE_GENERATOR=Visual Studio 17 2022" >> $env:GITHUB_ENV
+          "CMAKE_GENERATOR_TOOLSET=version=14.39" >> $env:GITHUB_ENV
 
       - name: Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade numpy
-          python -m pip install pyrender imageio imageio_ffmpeg trimesh pycollada networkx numba numpy_quaternion matplotlib scipy anytree meshcat pytest-cov
+          python -m pip install pytest-cov
 
       - name: Build and install
         run: python -m pip install .

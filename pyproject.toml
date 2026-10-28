@@ -13,8 +13,9 @@ description = "PyPhysX - python wrapper for PhysX Nvidia simulator."
 readme = "ReadMe.md"
 requires-python = ">=3.7"
 dependencies = ['numpy', 'imageio', 'imageio_ffmpeg', 'trimesh', 'networkx',
-    'numba', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat',
-    'pycollada']
+    'numba<0.62; platform_system == "Darwin" and platform_machine == "x86_64"',
+    'numba; platform_system != "Darwin" or platform_machine != "x86_64"', 'numpy_quaternion', 'matplotlib', 'scipy', 'anytree', 'pyrender', 'meshcat',
+    'pycollada<0.9; python_version < "3.9"', 'pycollada; python_version >= "3.9"']
 
 [tool.scikit-build]
 wheel.packages = ["pyphysx_utils", "pyphysx_render", "src/pyphysx"]
