@@ -120,7 +120,7 @@ class MeshcatViewer(ViewerBase):
             return g.ObjMeshGeometry.from_stream(trimesh.util.wrap_as_stream(exp_obj))
         elif shape.get_geometry_type() == GeometryType.CONVEXMESH:
             data = shape.get_shape_data()  # N x 9 - i.e. 3 triangles
-            faces = np.arange(0, data.shape[0] * 3, 1, dtype=np.int).reshape(-1, 3)
+            faces = np.arange(0, data.shape[0] * 3, 1, dtype=int).reshape(-1, 3)
             return g.TriangularMeshGeometry(vertices=data.reshape(-1, 3), faces=faces)
         elif shape.get_geometry_type() == GeometryType.SPHERE:
             return g.Sphere(radius=shape.get_sphere_radius())

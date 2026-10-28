@@ -41,12 +41,14 @@ class UrdfParserTestCase(unittest.TestCase):
         points = data.reshape(-1, 3)
         r = 0.1
         l = 0.6
-        self.assertAlmostEqual(-r, points[:, 0].min())
-        self.assertAlmostEqual(r, points[:, 0].max())
-        self.assertAlmostEqual(-r, points[:, 1].min())
-        self.assertAlmostEqual(r, points[:, 1].max())
-        self.assertAlmostEqual(-l / 2, points[:, 2].min())
-        self.assertAlmostEqual(l / 2, points[:, 2].max())
+        # PhysX cooking returns float32 vertices; allow two ulps at this scale.
+        assert points.dtype == np.float32
+        tolerance = 2 * np.spacing(np.float32(l / 2))
+        np.testing.assert_allclose(points.min(axis=0), [-r, -r, -l / 2],
+                                   rtol=0, atol=tolerance)
+        np.testing.assert_allclose(points.max(axis=0), [r, r, l / 2],
+                                   rtol=0, atol=tolerance)
+
 
     def test_urdf_dae(self):
         robot = URDFRobot(urdf_path=Path(os.path.realpath(__file__)).parent.joinpath('data/test_urdf_dae.urdf'))

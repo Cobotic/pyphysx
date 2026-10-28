@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "pyphysx"
-version = "0.2.5"
+version = "0.2.6"
 license = { text = "GPL-3.0-or-later" }
 authors = [
     { name = "Vladimir Petrik", email = "vladimir.petrik@cvut.cz" },

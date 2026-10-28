@@ -1,40 +1,55 @@
 name: PyPhysX
-on: [ push ]
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-        python-version: [ '3.8', '3.12' ]
+    name: Linux / Python 3.12
+    # Cobotic's supported offline platform; PhysX 4.1.1 / Conan 1 require
+    # a compatible compiler rather than the latest hosted GCC.
+    runs-on: ubuntu-22.04
+    env:
+      CC: gcc-11
+      CXX: g++-11
+      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CONAN_CPU_COUNT: 2
+      MPLBACKEND: Agg
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.12'
 
-      - name: System Linux Dependencies
+      - name: System dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install freeglut3-dev
-        if: runner.os == 'Linux'
+          sudo apt-get install -y freeglut3-dev
 
-      - name: Python Dependencies
+      - name: Python dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade numpy
-          python -m pip install codecov pyrender imageio imageio_ffmpeg trimesh pycollada networkx numba numpy_quaternion matplotlib scipy anytree meshcat pytest-cov
+          python -m pip install pytest-cov pyright==1.1.414
 
       - name: Build and install
         run: python -m pip install .
 
       - name: Run tests and generate coverage report
-        run: |
-          pytest tests --cov=pyphysx --cov=pyphysx_utils --cov=pyphysx_render --cov-report=xml
-        if: runner.os == 'Linux'
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        if: runner.os == 'Linux'
+        run: pytest tests --cov=pyphysx --cov=pyphysx_utils --cov=pyphysx_render --cov-report=xml
 
+      - name: Check native binding types
+        run: pyright --project pyrightconfig.json
+
+      - name: Retain coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-linux-py312
+          path: coverage.xml
+          if-no-files-found: ignore
